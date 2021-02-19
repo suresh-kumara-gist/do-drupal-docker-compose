@@ -1,5 +1,8 @@
 version: "3"
 
+networks:
+  do-drupal:
+
 services:
   mysql:
     image: mysql:8.0
@@ -10,7 +13,9 @@ services:
     volumes:
       - db-data:/var/lib/mysql
     networks:
-      - internal
+      - do-drupal
+    # networks:
+    #   - internal
 
   drupal:
     image: drupal:8.7.8-fpm-alpine
@@ -19,8 +24,10 @@ services:
       - mysql
     restart: unless-stopped
     networks:
-      - internal
-      - external
+      - do-drupal    
+    # networks:
+    #   - internal
+    #   - external
     volumes:
       - drupal-data:/var/www/html
 
@@ -31,13 +38,15 @@ services:
       - drupal
     restart: unless-stopped
     ports:
-      - 80:80
+      - 3000:80
     volumes:
       - drupal-data:/var/www/html
       - ./nginx-conf:/etc/nginx/conf.d
       - certbot-etc:/etc/letsencrypt
     networks:
-      - external
+      - do-drupal      
+    # networks:
+    #   - external
 
 #  certbot:
 #    depends_on:
@@ -60,11 +69,11 @@ services:
     command: certonly --webroot --webroot-path=/var/www/html --email sammy@your_domain --agree-tos --no-eff-email --force-renewal -d your_domain -d www.your_domain
 
 
-networks:
-  external:
-    driver: bridge
-  internal:
-    driver: bridge
+# networks:
+#   external:
+#     driver: bridge
+#   internal:
+#     driver: bridge
 
 volumes:
   drupal-data:
